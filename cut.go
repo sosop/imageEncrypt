@@ -1,4 +1,4 @@
-// Package imageEncrypt cut 切图操作
+// Package imageEncrypt cut is Cutting Image
 package imageEncrypt
 
 import (
@@ -13,59 +13,58 @@ import (
 )
 
 const (
-	// DefaultPatitionX 默认x
+	// DefaultPatitionX default cols
 	DefaultPatitionX = 4
-	// DefaultPatitionY 默认y
+	// DefaultPatitionY default rows
 	DefaultPatitionY = 4
 )
 
-// Cut 切图接口
+// Cut interface
 type Cut interface {
 	Cutting(reader io.Reader, filename string, condition ...interface{}) (MetaCuttedImage, error)
 }
 
-// RectangleCut 矩形切图
+// RectangleCut cutting image to litle Rectangle image
 type RectangleCut struct {
-	// 横向切几份
+	// cols
 	partitionX int
-	// 纵向切几份
+	// rows
 	partitionY int
 
-	// 切片存储
+	// Image Storage Interface
 	storage Storage
-	// 切片元信息存储
+	// Meta-information storage interface
 	meta Meta
 }
 
-// NewDefaultRectangleCut 构造默认
+// NewDefaultRectangleCut constructor
 func NewDefaultRectangleCut(storage Storage, meta Meta) *RectangleCut {
 	return NewRectangleCut(DefaultPatitionX, DefaultPatitionY, storage, meta)
 }
 
-// NewRectangleCut 指定值
+// NewRectangleCut constructor
 func NewRectangleCut(partitionX, patitionY int, storage Storage, meta Meta) *RectangleCut {
 	return &RectangleCut{partitionX: partitionX, partitionY: patitionY, storage: storage, meta: meta}
 }
 
-// Cutting 实现切图接口
+// Cutting implement the interface of Cut
 func (r RectangleCut) Cutting(reader io.Reader, filename string, condition ...interface{}) (*MetaCuttedImage, error) {
-	// 获取图片扩展名判断类型
 	ext := strings.ToLower(filepath.Ext(filename))
 	src, err := imaging.Decode(reader)
 	if err != nil {
 		return nil, err
 	}
-	// 计算原始图片大小
+
 	rect := src.Bounds()
 	x := rect.Max.X - rect.Min.X
 	y := rect.Max.Y - rect.Min.X
-	// 横向步长
+	// step of x
 	stepX := x / r.partitionX
-	// 纵向步长
+	// step of y
 	stepY := y / r.partitionY
 	images := make([]CuttedImage, r.partitionX*r.partitionY)
 	k := 0
-	// 多个gor切割上传
+	// goroutine save splice image
 	wg := new(sync.WaitGroup)
 	wg.Add(r.partitionX * r.partitionY)
 	for row := 0; row < r.partitionY; row++ {
@@ -99,6 +98,6 @@ func (r RectangleCut) Cutting(reader io.Reader, filename string, condition ...in
 	}
 	wg.Wait()
 	metaImage := MetaCuttedImage{images, x, y, Rectangle, ext}
-	r.meta.save(metaImage, condition)
+	r.meta.save(metaImage, condition...)
 	return &metaImage, nil
 }

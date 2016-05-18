@@ -1,4 +1,4 @@
-// Package imageEncrypt models 原始图片、切图后元信息
+// Package imageEncrypt models
 package imageEncrypt
 
 import (
@@ -14,17 +14,17 @@ const (
 	Rectangle = iota
 	RightTriangle
 
-	// Degree0 不旋转
+	// Degree0
 	Degree0 = iota
-	// Degree90 旋转90度
+	// Degree90
 	Degree90
-	// Degree180 旋转90度
+	// Degree180
 	Degree180
-	// Degree270 旋转90度
+	// Degree270
 	Degree270
 )
 
-// 图片格式
+// image's formats
 var (
 	formats = map[string]imaging.Format{
 		".jpg":  imaging.JPEG,
@@ -37,13 +37,13 @@ var (
 	}
 )
 
-// Point 切割点坐标
+// Point
 type Point struct {
 	X int `json:"x"`
 	Y int `json:"y"`
 }
 
-// MetaCuttedImage 被切图片组元信息
+// MetaCuttedImage meta information
 type MetaCuttedImage struct {
 	Images []CuttedImage `json:"images"`
 	MaxX   int           `json:"maxX"`
@@ -52,7 +52,7 @@ type MetaCuttedImage struct {
 	Ext    string        `json:"ext"`
 }
 
-// CuttedImage 被切图片
+// CuttedImage splice image
 type CuttedImage struct {
 	ID       int     `json:"id"`
 	Location string  `json:"location"`

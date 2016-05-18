@@ -1,4 +1,4 @@
-// Package imageEncrypt storage 保存被切图片
+// Package imageEncrypt storage is storing the splice image
 package imageEncrypt
 
 import (
@@ -14,18 +14,18 @@ import (
 	"github.com/sosop/imaging"
 )
 
-// Storage 存储接口
+// Storage interface
 type Storage interface {
 	save(image *CuttedImage, subImage image.Image, filename string, wg *sync.WaitGroup, exts ...string)
 	get(path ...string) (io.ReadCloser, error)
 }
 
-// FileStorage 文件存储
+// FileStorage Use file system to store splice image
 type FileStorage struct {
 	dir string
 }
 
-// NewFileStorage 构造文件存储
+// NewFileStorage constructor
 func NewFileStorage(dir string) *FileStorage {
 	return &FileStorage{dir}
 }
@@ -51,7 +51,7 @@ func (s *FileStorage) get(paths ...string) (io.ReadCloser, error) {
 	return f, nil
 }
 
-// 字节缓冲区
+// byte buffer
 func data(img image.Image, ext string) (*bytes.Buffer, error) {
 	f, ok := formats[ext]
 	if !ok {

@@ -1,7 +1,9 @@
-// Package imageEncrypt assembe 拼接图片
+// Package imageEncrypt assembe interface is restoring image
 package imageEncrypt
 
 import (
+	"bytes"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"image"
@@ -11,28 +13,33 @@ import (
 	"github.com/sosop/imaging"
 )
 
-// Assembe 接口
+// Assembe it's a interface.
+// Implement this interface
 type Assembe interface {
-	assembing(condition ...interface{}) ([]byte, error)
+	// assembing function do Specific work
+	assembing(condition ...interface{}) ([]byte, string, error)
 }
 
-// FileSystemAssembe 从文件系统中获取图片进行封装
+// FileSystemAssembe Read slice image from the file system and restore
 type FileSystemAssembe struct {
+	// Image Storage Interface
 	s Storage
+	// Meta-information storage interface
 	m Meta
 }
 
-// NewFileSystemAssembe 构造
+// NewFileSystemAssembe constructor
 func NewFileSystemAssembe(s Storage, m Meta) *FileSystemAssembe {
 	return &FileSystemAssembe{s, m}
 }
 
-func (a *FileSystemAssembe) assembing(condition ...interface{}) ([]byte, error) {
-	metaImage, err := a.m.get(condition)
+// Implement the interface of Assembe
+func (a *FileSystemAssembe) assembing(condition ...interface{}) ([]byte, string, error) {
+	metaImage, err := a.m.get(condition...)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
-	// 创建图片
+	// create old image
 	full := image.NewNRGBA(image.Rect(0, 0, metaImage.MaxX, metaImage.MaxY))
 	n := len(metaImage.Images)
 	wg := new(sync.WaitGroup)
@@ -43,21 +50,33 @@ func (a *FileSystemAssembe) assembing(condition ...interface{}) ([]byte, error) 
 	}
 	wg.Wait()
 	if !flag {
-		return nil, errors.New("加载失败")
+		return nil, "", errors.New("加载失败")
 	}
+	// save old image on the file system
 	imaging.Save(full, fmt.Sprint("test", metaImage.Ext))
-	/*
-		buf := bytes.NewBuffer(nil)
-		f, _ := formats[metaImage.Ext]
-		err := imaging.Encode(buf, full, f)
-		if err != nil {
-			return nil, err
-		}
-		data := base64.StdEncoding.EncodeToString(buf.Bytes())
-	*/
-	return nil, nil
+
+	// return image bytes
+	buf := bytes.NewBuffer(nil)
+	f, _ := formats[metaImage.Ext]
+	err = imaging.Encode(buf, full, f)
+	if err != nil {
+		return nil, "", err
+	}
+	// return image string
+	// data := base64.StdEncoding.EncodeToString(buf.Bytes())
+	return buf.Bytes(), metaImage.Ext, nil
 }
 
+func (a *FileSystemAssembe) assebingBase64(condition ...interface{}) (string, error) {
+	buf, ext, err := a.assembing(condition...)
+	if err != nil {
+		return "", err
+	}
+	imgBase64 := fmt.Sprint("data:image/", ext[1:], ";base64,", base64.StdEncoding.EncodeToString(buf))
+	return imgBase64, nil
+}
+
+// draw the old image from splice image
 func drawIt(s Storage, cuttedImage CuttedImage, bg *image.NRGBA, flag *bool, wg *sync.WaitGroup) {
 	defer wg.Done()
 	rc, err := s.get(cuttedImage.Location)

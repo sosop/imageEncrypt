@@ -1,7 +1,8 @@
-// Package imageEncrypt meta 存储图片分片后的元信息
+// Package imageEncrypt meta information
 package imageEncrypt
 
 import (
+	"errors"
 	"time"
 
 	"encoding/json"
@@ -9,18 +10,18 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
-// Meta 存储获取元信息
+// Meta interface of meta information
 type Meta interface {
 	save(metaImage MetaCuttedImage, condition ...interface{}) (interface{}, error)
 	get(condition ...interface{}) (MetaCuttedImage, error)
 }
 
-// MetaByRedis 使用redis存储切片元信息
+// MetaByRedis Use redis store the meta info
 type MetaByRedis struct {
 	pool *redis.Pool
 }
 
-// NewMetaByRedis 构造NewMetaByRedis
+// NewMetaByRedis constructor
 func NewMetaByRedis(addr, pass string) *MetaByRedis {
 	pool := newPool(addr, pass)
 	return &MetaByRedis{pool}
@@ -66,6 +67,9 @@ func (m *MetaByRedis) get(condition ...interface{}) (MetaCuttedImage, error) {
 	metaImage := MetaCuttedImage{}
 	if err != nil {
 		return metaImage, err
+	}
+	if data == nil {
+		return metaImage, errors.New("meta info is not exist!")
 	}
 	err = json.Unmarshal(data.([]byte), &metaImage)
 	return metaImage, err
