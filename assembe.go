@@ -17,7 +17,7 @@ import (
 // Implement this interface
 type Assembe interface {
 	// assembing function do Specific work
-	assembing(condition ...interface{}) ([]byte, string, error)
+	Assembing(condition ...interface{}) ([]byte, string, error)
 }
 
 // FileSystemAssembe Read slice image from the file system and restore
@@ -34,8 +34,8 @@ func NewFileSystemAssembe(s Storage, m Meta) *FileSystemAssembe {
 }
 
 // Implement the interface of Assembe
-func (a *FileSystemAssembe) assembing(condition ...interface{}) ([]byte, string, error) {
-	metaImage, err := a.m.get(condition...)
+func (a *FileSystemAssembe) Assembing(condition ...interface{}) ([]byte, string, error) {
+	metaImage, err := a.m.Get(condition...)
 	if err != nil {
 		return nil, "", err
 	}
@@ -53,7 +53,7 @@ func (a *FileSystemAssembe) assembing(condition ...interface{}) ([]byte, string,
 		return nil, "", errors.New("加载失败")
 	}
 	// save old image on the file system
-	imaging.Save(full, fmt.Sprint("test", metaImage.Ext))
+	// imaging.Save(full, fmt.Sprint("test", metaImage.Ext))
 
 	// return image bytes
 	buf := bytes.NewBuffer(nil)
@@ -67,8 +67,8 @@ func (a *FileSystemAssembe) assembing(condition ...interface{}) ([]byte, string,
 	return buf.Bytes(), metaImage.Ext, nil
 }
 
-func (a *FileSystemAssembe) assebingBase64(condition ...interface{}) (string, error) {
-	buf, ext, err := a.assembing(condition...)
+func (a *FileSystemAssembe) AssebingBase64(condition ...interface{}) (string, error) {
+	buf, ext, err := a.Assembing(condition...)
 	if err != nil {
 		return "", err
 	}
@@ -79,7 +79,7 @@ func (a *FileSystemAssembe) assebingBase64(condition ...interface{}) (string, er
 // draw the old image from splice image
 func drawIt(s Storage, cuttedImage CuttedImage, bg *image.NRGBA, flag *bool, wg *sync.WaitGroup) {
 	defer wg.Done()
-	rc, err := s.get(cuttedImage.Location)
+	rc, err := s.Get(cuttedImage.Location)
 	if err != nil {
 		*flag = false
 		return

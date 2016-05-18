@@ -16,8 +16,8 @@ import (
 
 // Storage interface
 type Storage interface {
-	save(image *CuttedImage, subImage image.Image, filename string, wg *sync.WaitGroup, exts ...string)
-	get(path ...string) (io.ReadCloser, error)
+	Save(image *CuttedImage, subImage image.Image, filename string, wg *sync.WaitGroup, exts ...string)
+	Get(path ...string) (io.ReadCloser, error)
 }
 
 // FileStorage Use file system to store splice image
@@ -30,7 +30,7 @@ func NewFileStorage(dir string) *FileStorage {
 	return &FileStorage{dir}
 }
 
-func (s *FileStorage) save(image *CuttedImage, subImage image.Image, filename string, wg *sync.WaitGroup, exts ...string) {
+func (s *FileStorage) Save(image *CuttedImage, subImage image.Image, filename string, wg *sync.WaitGroup, exts ...string) {
 	defer wg.Done()
 	fullname := fmt.Sprint(s.dir, fmt.Sprintf("%x", md5.Sum([]byte(filename))), exts[0])
 	err := imaging.Save(subImage, fullname)
@@ -40,7 +40,7 @@ func (s *FileStorage) save(image *CuttedImage, subImage image.Image, filename st
 	image.Location = fullname
 }
 
-func (s *FileStorage) get(paths ...string) (io.ReadCloser, error) {
+func (s *FileStorage) Get(paths ...string) (io.ReadCloser, error) {
 	if len(paths) == 0 {
 		return nil, errors.New("paths is empty")
 	}

@@ -14,7 +14,8 @@ go get -u github.com/sosop/imageEncrypt`
 # 文档
 
 
-```PACKAGE DOCUMENTATION
+```
+PACKAGE DOCUMENTATION
 
 package imageEncrypt
     import "."
@@ -41,6 +42,7 @@ const (
 )
 
 const (
+	 // shape of cutting
     Rectangle = iota
     RightTriangle
 
@@ -53,57 +55,54 @@ const (
     // Degree270
     Degree270
 )
-    shape of cutting
+    
 
 TYPES
 
+// Assembe it's a interface. Implement this interface
 type Assembe interface {
-    // contains filtered or unexported methods
 }
-    Assembe it's a interface. Implement this interface
-
+    
+// Cut interface
 type Cut interface {
     Cutting(reader io.Reader, filename string, condition ...interface{}) (MetaCuttedImage, error)
 }
-    Cut interface
-
+    
+//  CuttedImage splice image
 type CuttedImage struct {
     ID       int     `json:"id"`
     Location string  `json:"location"`
     Points   []Point `json:"points"`
     Rotate   int     `json:"rotate"`
 }
-    CuttedImage splice image
-
+   
+// FileStorage Use file system to store splice image
 type FileStorage struct {
-    // contains filtered or unexported fields
 }
-    FileStorage Use file system to store splice image
-
+    
+// NewFileStorage constructor
 func NewFileStorage(dir string) *FileStorage
-    NewFileStorage constructor
-
+    
+// FileSystemAssembe Read slice image from the file system and restore
 type FileSystemAssembe struct {
-    // contains filtered or unexported fields
 }
-    FileSystemAssembe Read slice image from the file system and restore
-
+   
+// NewFileSystemAssembe constructor
 func NewFileSystemAssembe(s Storage, m Meta) *FileSystemAssembe
-    NewFileSystemAssembe constructor
+    
 
+// Meta interface of meta information
 type Meta interface {
-    // contains filtered or unexported methods
 }
-    Meta interface of meta information
-
+    
+// MetaByRedis Use redis store the meta info
 type MetaByRedis struct {
-    // contains filtered or unexported fields
 }
-    MetaByRedis Use redis store the meta info
-
+    
+// NewMetaByRedis constructor
 func NewMetaByRedis(addr, pass string) *MetaByRedis
-    NewMetaByRedis constructor
-
+    
+// MetaCuttedImage meta information
 type MetaCuttedImage struct {
     Images []CuttedImage `json:"images"`
     MaxX   int           `json:"maxX"`
@@ -111,32 +110,29 @@ type MetaCuttedImage struct {
     Shape  int           `json:"shape"`
     Ext    string        `json:"ext"`
 }
-    MetaCuttedImage meta information
-
+   
+// Point
 type Point struct {
     X int `json:"x"`
     Y int `json:"y"`
 }
-    Point
-
+    
+// RectangleCut cutting image to litle Rectangle image
 type RectangleCut struct {
-    // contains filtered or unexported fields
 }
-    RectangleCut cutting image to litle Rectangle image
 
+// NewDefaultRectangleCut constructor
 func NewDefaultRectangleCut(storage Storage, meta Meta) *RectangleCut
-    NewDefaultRectangleCut constructor
-
+    
+// NewRectangleCut constructor
 func NewRectangleCut(partitionX, patitionY int, storage Storage, meta Meta) *RectangleCut
-    NewRectangleCut constructor
-
+    
+// Cutting implement the interface of Cut
 func (r RectangleCut) Cutting(reader io.Reader, filename string, condition ...interface{}) (*MetaCuttedImage, error)
-    Cutting implement the interface of Cut
-
+    
+// Storage interface
 type Storage interface {
-    // contains filtered or unexported methods
 }
-    Storage interface
 
 SUBDIRECTORIES
 
@@ -147,7 +143,8 @@ SUBDIRECTORIES
 
 切割原始图片
 	
-```// 切片图片为文件存储方式，存储路径为当前目录
+```
+	// 切片图片为文件存储方式，存储路径为当前目录
 	s := imageEncrypt.NewFileStorage("./")
 
 	//元信息用redis存储
@@ -173,7 +170,8 @@ SUBDIRECTORIES
 
 还原图片
 	
-```// 元数据存储接口
+```
+	// 元数据存储接口
 	m := NewMetaByRedis("127.0.0.1:6379", "test")
 
 	// 切片图片存储接口
@@ -181,9 +179,31 @@ SUBDIRECTORIES
 
 	// 还原图片
 	a := NewFileSystemAssembe(s, m)
-	_, err := a.assembing("test1")
+	_, _, err := a.Assembing("test1")
 	if err != nil {
 		log.Fatal(err)
 	}
 ```
+
+注：
+需要自定义切片图片的存储方式可以实现Storage接口，可以使用文件系统、云存储等
+
+```
+// Storage interface
+type Storage interface {
+	Save(image *CuttedImage, subImage image.Image, filename string, wg *sync.WaitGroup, exts ...string)
+	Get(path ...string) (io.ReadCloser, error)
+}
+```
+
+需要自定义切片图片元数据存储方式，实现Meta接口，可以用数据库、缓存、文件等方式
+
+```
+// Meta interface of meta information
+type Meta interface {
+	Save(metaImage MetaCuttedImage, condition ...interface{}) (interface{}, error)
+	Get(condition ...interface{}) (MetaCuttedImage, error)
+}
+```
+
 

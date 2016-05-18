@@ -92,12 +92,12 @@ func (r RectangleCut) Cutting(reader io.Reader, filename string, condition ...in
 			retangle := image.Rect(p1.X, p1.Y, p2.X, p2.Y)
 			subImg := imaging.Crop(src, retangle)
 			img := rotate(subImg, &images[k])
-			go r.storage.save(&images[k], img, strconv.Itoa(k)+filename, wg, ext)
+			go r.storage.Save(&images[k], img, strconv.Itoa(k)+filename, wg, ext)
 			k++
 		}
 	}
 	wg.Wait()
 	metaImage := MetaCuttedImage{images, x, y, Rectangle, ext}
-	r.meta.save(metaImage, condition...)
+	r.meta.Save(metaImage, condition...)
 	return &metaImage, nil
 }

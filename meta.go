@@ -12,8 +12,8 @@ import (
 
 // Meta interface of meta information
 type Meta interface {
-	save(metaImage MetaCuttedImage, condition ...interface{}) (interface{}, error)
-	get(condition ...interface{}) (MetaCuttedImage, error)
+	Save(metaImage MetaCuttedImage, condition ...interface{}) (interface{}, error)
+	Get(condition ...interface{}) (MetaCuttedImage, error)
 }
 
 // MetaByRedis Use redis store the meta info
@@ -54,7 +54,7 @@ func newPool(addr, pass string) *redis.Pool {
 	}
 }
 
-func (m *MetaByRedis) save(metaImage MetaCuttedImage, condition ...interface{}) (interface{}, error) {
+func (m *MetaByRedis) Save(metaImage MetaCuttedImage, condition ...interface{}) (interface{}, error) {
 	data, err := json.Marshal(metaImage)
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func (m *MetaByRedis) save(metaImage MetaCuttedImage, condition ...interface{}) 
 	return m.pool.Get().Do("SET", condition[0], data)
 }
 
-func (m *MetaByRedis) get(condition ...interface{}) (MetaCuttedImage, error) {
+func (m *MetaByRedis) Get(condition ...interface{}) (MetaCuttedImage, error) {
 	data, err := m.pool.Get().Do("GET", condition[0])
 	metaImage := MetaCuttedImage{}
 	if err != nil {
