@@ -1,4 +1,4 @@
-// Package imageEncrypt storage is storing the splice image
+// Package imageEncrypt storage is storing the slice image
 package imageEncrypt
 
 import (
@@ -20,7 +20,7 @@ type Storage interface {
 	Get(path ...string) (io.ReadCloser, error)
 }
 
-// FileStorage Use file system to store splice image
+// FileStorage Use file system to store slice image
 type FileStorage struct {
 	dir string
 }

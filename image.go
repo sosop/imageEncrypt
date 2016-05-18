@@ -52,7 +52,7 @@ type MetaCuttedImage struct {
 	Ext    string        `json:"ext"`
 }
 
-// CuttedImage splice image
+// CuttedImage slice image
 type CuttedImage struct {
 	ID       int     `json:"id"`
 	Location string  `json:"location"`
