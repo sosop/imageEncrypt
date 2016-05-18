@@ -8,8 +8,11 @@ imageEncrypt包提供对图片进行切片和随机旋转角度来达到对图�
 
 # 安装
 
-`go get -u github.com/sosop/imaging
-go get -u github.com/sosop/imageEncrypt`
+
+```
+go get -u github.com/sosop/imaging
+go get -u github.com/sosop/imageEncrypt
+```
 
 # 文档
 
